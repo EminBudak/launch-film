@@ -136,6 +136,7 @@ function iconFor(title, line, used) {
 }
 
 const VERBS = /^(have|has|had|use|uses|used|are|is|was|were|trust|trusts|rely|relies|choose|chose|run|runs|love|loves|build|built|ship|shipped|on|since|and|to|who|that|with|across|in)$/i;
+const AFTER = /^(through|for|from|by|via|like|including|over|per|at|of)$/i;
 // A number the page states with what it counts: "10,000+ teams",
 // "99.9% uptime", "4.8 stars".
 function findNumber(texts) {
@@ -153,7 +154,10 @@ function findNumber(texts) {
     // of Fortune 100 companies have used Stripe".
     const words = [];
     for (const word of wordsIn(m[3])) {
-      if (VERBS.test(word) || words.length >= 5) break;
+      // "of" may open the label ("50% of Fortune 100"); after its first
+      // word a verb or a preposition ends it ("40+ languages through quick
+      // lessons" counts languages).
+      if (words.length >= 5 || (VERBS.test(word) && !(words.length === 0 && /^of$/i.test(word))) || (words.length && AFTER.test(word))) break;
       words.push(word);
       if (/[,.;:]$/.test(word)) break;
     }

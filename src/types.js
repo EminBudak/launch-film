@@ -432,18 +432,20 @@ function number(scene, k) {
     html += `<div class="rule" style="${box(a.x, k.sz(150 + size * 1.15, 320 + size * 1.15), 160, 14)}background:var(--accent)"${A("grow-x", 1.1, 0.7)}></div>`;
     html += bodyText(k, scene.text, { x: a.x, y: k.sz(190 + size * 1.15, 360 + size * 1.15), w: k.sz(1300, a.w), h: k.sz(160, 280), size: k.sz(56, 52), t: 1.2, cls: "head" });
     sfx(k, "hit", 0.2, 0.45);
-    return { html, css: css + `.fam-gridline .t-number .body{color:var(--fg)}`, end: 2.2 };
+    return { html, css: css + `.fam-gridline.t-number .body{color:var(--fg)}`, end: 2.2 };
   }
   if (L === "pop") {
     const d = k.sz(660, 760);
     const cx = k.W / 2;
     const cy = k.sz(420, 700);
     html += `<div class="abs" style="${box(cx - d / 2, cy - d / 2, d, d)}border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px #15131A,14px 16px 0 #15131A"${A("pop", 0.05, 0.9, 0, ' data-from="0.2"')}></div>`;
-    html += `<div class="big fit num" data-fit="80" style="${box(cx - d * 0.46, cy - size * 0.5, d * 0.92, size)}font-size:${R(size * 0.9)}px;text-align:center;color:var(--on)"${A("count", 0.3, 0.9, 0, ` data-v="${k.esc(v)}"`)}>${k.esc(v)}</div>`;
+    // Inside the disc's chord at that height, and centred on the digits'
+    // ink (they sit high in their line box).
+    html += `<div class="big fit num" data-fit="80" style="${box(cx - d * 0.36, cy - size * 0.31, d * 0.72, size)}font-size:${R(size * 0.9)}px;text-align:center;color:var(--on)"${A("count", 0.3, 0.9, 0, ` data-v="${k.esc(v)}"`)}>${k.esc(v)}</div>`;
     html += bodyText(k, scene.text, { x: a.x, y: cy + d / 2 + 40, w: a.w, h: k.sz(140, 200), size: k.sz(58, 54), t: 1.1, align: "center", cls: "head" });
     sfx(k, "item", 0.1, 0.45);
     sfx(k, "hit", 1.3, 0.35);
-    return { html, css: css + `.fam-pop .t-number .body{color:var(--fg)}`, end: 2.2 };
+    return { html, css: css + `.fam-pop.t-number .body{color:var(--fg)}`, end: 2.2 };
   }
   // launch, aurora: the number decodes in a ring of light
   const cx = k.W / 2;
