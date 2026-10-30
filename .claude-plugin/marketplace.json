@@ -8,7 +8,7 @@
     {
       "name": "launch-film",
       "description": "Plans, renders and checks a launch film (MP4 with music and sound effects) for a product from its website or App Store page. Renders locally with Chrome and ffmpeg.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "source": "./",
       "skills": ["./skills/launch-film"],
       "author": {

@@ -12,7 +12,7 @@ npx launch-film linear.app
 
 Tools that make videos with code usually start from a brief: you describe the product, its colors and the style you want. launch-film starts from the site. [easybrandkit](https://github.com/EminBudak/easybrandkit) reads the logo, colors, fonts and first screen in a headless browser, the page's own headline and section titles become the film's words, and a look is picked to suit the brand. You get an MP4 at 1920x1080, rendered on your machine with Chrome and ffmpeg. There is no account, no API key and nothing is uploaded.
 
-How it was built, and what testing changed: [launch-film: Building a Product Film From a Site](https://eminbudak.com/blog/launch-film-engineering-notes/).
+Read the story behind it on my blog: [launch-film: A Launch Film From Your Website](https://eminbudak.com/blog/launch-film-from-your-website/).
 
 ## Use it with your agent
 
