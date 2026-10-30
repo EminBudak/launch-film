@@ -91,7 +91,7 @@ test("text helpers", () => {
   assert.equal(findNumber(["We have 3 offices"]), null);
 });
 
-test("brandkit's headings come first, with the page's line under each", () => {
+test("easybrandkit's headings come first, with the page's line under each", () => {
   const { copyFrom: copy } = require("../src/plan");
   const brand = { name: "Linear", host: "linear.app", profiles: [], description: "",
     text: { title: "", description: "", headings: [{ level: 1, text: "Plan and build" }, { level: 2, text: "Intake and integrations" }, { level: 2, text: "Planning and monitoring" }] } };

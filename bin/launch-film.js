@@ -20,13 +20,15 @@ Usage:
 Options:
   --out <dir>          Folder for the brand, film.json and the film
                        (default: ./launch-film-<site>).
-  --brand <path>       Use a brandkit folder or brand.json you already have.
+  --brand <path>       Use a kit you already have: an easybrandkit folder
+                       or its brand.json.
   --words <file>       Use a words.json you already have instead of reading
                        the page again.
-  --brandkit <cmd>     The brandkit to run: a command, or the path of its
-                       scripts/brandkit.js (default: LAUNCH_FILM_BRANDKIT, a
-                       brandkit on PATH, else @eminbudak/brandkit with npx).
-                       Install it with npm install -g @eminbudak/brandkit.
+  --easybrandkit <cmd> The easybrandkit to run: a command, or the path of
+                       its scripts/easybrandkit.js (default:
+                       LAUNCH_FILM_EASYBRANDKIT, an easybrandkit on PATH,
+                       else easybrandkit with npx).
+                       Install it with npm install -g easybrandkit.
   --look <name>        launch, aurora, gridline, pop or journal (default: picked
                        from the brand).
   --seconds <n>        Aim for this length, 20-40 (default 30).
@@ -74,7 +76,7 @@ function normaliseUrl(raw) {
 }
 
 async function makePlan(url, flags) {
-  const { runBrandkit, readBrand } = require("../src/brand");
+  const { runEasybrandkit, readBrand } = require("../src/brand");
   const { readWords } = require("../src/words");
   const { planFilm } = require("../src/plan");
   const host = new URL(url).hostname.replace(/^www\./, "");
@@ -95,28 +97,27 @@ async function makePlan(url, flags) {
       brandFile = path.join(local, path.basename(brandFile));
     }
   } else if (isStoreUrl(url)) {
-    // brandkit reads a store listing and the maker's site it names. When it
-    // cannot (an older brandkit, none installed), an App Store listing is
-    // read here from Apple's lookup API.
+    // easybrandkit reads a store listing and the maker's site it names. When
+    // it cannot, an App Store listing is read here from Apple's lookup API.
     const dir = path.join(out, "brand");
-    say(`Reading the store listing with brandkit...\n`);
+    say(`Reading the store listing with easybrandkit...\n`);
     try {
-      brandFile = await runBrandkit(url, dir, { command: flags.brandkit, log: (t) => flags.verbose && say(t) });
+      brandFile = await runEasybrandkit(url, dir, { command: flags.easybrandkit, log: (t) => flags.verbose && say(t) });
       const kit = JSON.parse(fs.readFileSync(brandFile, "utf8"));
       const listing = (kit.stores || []).find((s) => s && /appstore|googleplay/i.test(String(s.type)) && s.ok !== false);
-      if (!listing) throw new Error("brandkit read no store listing from it");
+      if (!listing) throw new Error("easybrandkit read no store listing from it");
       kit.app = { name: listing.name || kit.name || "", by: listing.by || "", site: listing.site || "" };
       fs.writeFileSync(brandFile, JSON.stringify(kit, null, 2) + "\n");
     } catch (err) {
       if (!appStoreId(url)) fail(`${err.message}`);
-      say(`brandkit could not read the listing (${err.message.split(". ")[0]}); reading it from the App Store instead.\n`);
+      say(`easybrandkit could not read the listing (${err.message.split(". ")[0]}); reading it from the App Store instead.\n`);
       fs.rmSync(dir, { recursive: true, force: true });
-      const made = await storeBrand(url, dir, { runBrandkit: (u, d, o) => runBrandkit(u, d, { ...o, command: flags.brandkit }), log: say });
+      const made = await storeBrand(url, dir, { runEasybrandkit: (u, d, o) => runEasybrandkit(u, d, { ...o, command: flags.easybrandkit }), log: say });
       brandFile = made.brandFile;
     }
   } else {
-    say(`Reading the brand of ${url} with brandkit...\n`);
-    brandFile = await runBrandkit(url, path.join(out, "brand"), { command: flags.brandkit, log: (t) => flags.verbose && say(t) });
+    say(`Reading the brand of ${url} with easybrandkit...\n`);
+    brandFile = await runEasybrandkit(url, path.join(out, "brand"), { command: flags.easybrandkit, log: (t) => flags.verbose && say(t) });
   }
   const brand = readBrand(brandFile);
   // A kit made from an App Store page carries the listing's description.

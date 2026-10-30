@@ -3,7 +3,7 @@
 // An App Store address is read as the app, not as the store's website: its
 // listing comes from Apple's public lookup API (name, maker, icon,
 // screenshots, rating, description and the maker's own site). The maker's
-// site, when the listing names one, is read with brandkit for its colors,
+// site, when the listing names one, is read with easybrandkit for its colors,
 // fonts and first screen; the app's icon and screenshots are added to that
 // kit. Without a site the kit is made from the listing alone.
 
@@ -112,17 +112,17 @@ function wordsFromListing(listing) {
   return { lang: "", title: listing.name, description: paragraphs.slice(0, 2).join(" "), siteName: listing.name, ogTitle: "", ogDescription: "", headings, ctas: [], paragraphs, jsonld: [] };
 }
 
-// Makes the brand folder for an App Store address: brandkit on the maker's
-// site when there is one (runBrandkit), the listing's icon and screenshots
+// Makes the brand folder for an App Store address: easybrandkit on the maker's
+// site when there is one (runEasybrandkit), the listing's icon and screenshots
 // added to it. Returns { brandFile, words }.
-async function storeBrand(url, dir, { runBrandkit, log = () => {} }) {
+async function storeBrand(url, dir, { runEasybrandkit, log = () => {} }) {
   const listing = await appStoreListing(url);
   fs.mkdirSync(dir, { recursive: true });
   let brand = null;
   if (listing.seller) {
-    log(`Reading the maker's site ${listing.seller} with brandkit...\n`);
+    log(`Reading the maker's site ${listing.seller} with easybrandkit...\n`);
     try {
-      await runBrandkit(listing.seller, dir, { log: () => {} });
+      await runEasybrandkit(listing.seller, dir, { log: () => {} });
       brand = JSON.parse(fs.readFileSync(path.join(dir, "brand.json"), "utf8"));
     } catch (err) {
       log(`The maker's site could not be read (${err.message}); the film is made from the App Store listing alone.\n`);

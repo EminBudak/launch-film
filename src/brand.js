@@ -1,9 +1,9 @@
 "use strict";
 // ─── the brand ─────────────────────────────────────────────────────────────
 // What a film takes from the product: its name, colours, typefaces, logo
-// captures, screens and store pages, read from a brandkit folder
-// (`brandkit <url> --out <dir>` writes <dir>/brand.json and the pictures next
-// to it). Paths in brand.json are relative to its folder.
+// captures, screens and store pages, read from an easybrandkit folder
+// (`easybrandkit <url> --out <dir>` writes <dir>/brand.json and the pictures
+// next to it). Paths in brand.json are relative to its folder.
 
 const fs = require("fs");
 const path = require("path");
@@ -34,30 +34,30 @@ const normHex = (v) => {
   return `#${h.toUpperCase()}`;
 };
 
-// The commands that may run brandkit, in the order they are tried: the one
-// given (a command, or the path of brandkit's script), else
-// LAUNCH_FILM_BRANDKIT, else a brandkit installed on PATH, else brandkit
-// from npm through npx, then from its GitHub repository when npm cannot
-// give it. On npm it is @eminbudak/brandkit; its command is still brandkit.
-function brandkitCommands(given = "") {
-  const raw = String(given || process.env.LAUNCH_FILM_BRANDKIT || "").trim();
+// The commands that may run easybrandkit, in the order they are tried: the
+// one given (a command, or the path of easybrandkit's script), else
+// LAUNCH_FILM_EASYBRANDKIT, else an easybrandkit installed on PATH, else
+// easybrandkit from npm through npx, then from its GitHub repository when
+// npm cannot give it.
+function easybrandkitCommands(given = "") {
+  const raw = String(given || process.env.LAUNCH_FILM_EASYBRANDKIT || "").trim();
   if (raw) {
     if (/\.(c?js|mjs)$/i.test(raw) && fs.existsSync(raw)) return [[process.execPath, raw]];
     return [raw.split(" ").filter(Boolean)];
   }
-  const installed = onPath(process.platform === "win32" ? "brandkit.cmd" : "brandkit");
+  const installed = onPath(process.platform === "win32" ? "easybrandkit.cmd" : "easybrandkit");
   if (installed) return [[installed]];
   const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-  return [[npx, "-y", "@eminbudak/brandkit"], [npx, "-y", "github:EminBudak/brandkit"]];
+  return [[npx, "-y", "easybrandkit"], [npx, "-y", "github:EminBudak/easybrandkit"]];
 }
 
-const HOW = "Install brandkit (npm install -g @eminbudak/brandkit), or point LAUNCH_FILM_BRANDKIT (or --brandkit) at its scripts/brandkit.js, or give a kit you already have with --brand.";
+const HOW = "Install easybrandkit (npm install -g easybrandkit), or point LAUNCH_FILM_EASYBRANDKIT (or --easybrandkit) at its scripts/easybrandkit.js, or give a kit you already have with --brand.";
 
-// Runs brandkit for a URL into a folder. Resolves the path of brand.json.
-// The next command is tried only when npx could not fetch brandkit; when
-// brandkit itself ran and failed, running it again would fail the same way.
-async function runBrandkit(url, dir, { log = () => {}, command = "" } = {}) {
-  const commands = brandkitCommands(command);
+// Runs easybrandkit for a URL into a folder. Resolves the path of brand.json.
+// The next command is tried only when npx could not fetch easybrandkit; when
+// easybrandkit ran and failed, running it again would fail the same way.
+async function runEasybrandkit(url, dir, { log = () => {}, command = "" } = {}) {
+  const commands = easybrandkitCommands(command);
   for (const [i, cmd] of commands.entries()) {
     try {
       return await runOnce(cmd, url, dir, log);
@@ -80,16 +80,16 @@ function runOnce([cmd, ...pre], url, dir, log) {
       out = (out + d).slice(-3000);
       log(String(d));
     });
-    child.on("error", (e) => reject(new Error(`brandkit could not be started (${e.message}). ${HOW}`)));
+    child.on("error", (e) => reject(new Error(`easybrandkit could not be started (${e.message}). ${HOW}`)));
     child.on("close", (code) => {
       if (code === 0 && fs.existsSync(path.join(dir, "brand.json"))) return resolve(path.join(dir, "brand.json"));
       const said = out.trim().split("\n").filter(Boolean).slice(-2).join(" ");
-      // npm's own error lines mean npx could not fetch brandkit (no such
-      // package, no network) before it ran; brandkit never prints them.
+      // npm's own error lines mean npx could not fetch easybrandkit (no such
+      // package, no network) before it ran; easybrandkit never prints them.
       const npm = /^npm (?:error|ERR!) code \S+/m.exec(out) || /^npm (?:error|ERR!) .+/m.exec(out);
-      if (npm) reject(Object.assign(new Error(`brandkit could not be fetched (${npm[0].trim()}). ${HOW}`), { unfetched: true }));
+      if (npm) reject(Object.assign(new Error(`easybrandkit could not be fetched (${npm[0].trim()}). ${HOW}`), { unfetched: true }));
       else if (/bot check/i.test(out)) reject(new Error(`${said} The brand could not be read: ask for the logo file and the main colors, or give a kit with --brand.`));
-      else reject(new Error(`brandkit failed (exit ${code})${said ? `: ${said}` : ""}`));
+      else reject(new Error(`easybrandkit failed (exit ${code})${said ? `: ${said}` : ""}`));
     });
   });
 }
@@ -104,7 +104,7 @@ function familyName(raw) {
   return /^[A-Za-z0-9 ]{2,60}$/.test(f) ? f : "";
 }
 
-// brandkit's "text" in the shape words.js gives: the page's title,
+// easybrandkit's "text" in the shape words.js gives: the page's title,
 // description and headings in order.
 function wordsOf(text) {
   if (!text || typeof text !== "object") return null;
@@ -216,4 +216,4 @@ function pickLook(brand) {
   return "gridline";
 }
 
-module.exports = { runBrandkit, brandkitCommands, readBrand, pickLook, familyName, luminance, saturation, hue, normHex };
+module.exports = { runEasybrandkit, easybrandkitCommands, readBrand, pickLook, familyName, luminance, saturation, hue, normHex };

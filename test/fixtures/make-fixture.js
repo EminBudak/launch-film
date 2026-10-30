@@ -2,7 +2,7 @@
 "use strict";
 // Draws the test brand, "Acme Notes", a product that does not exist: its
 // header logo, the first screen of its site, a store screenshot and an app
-// icon, with brand.json in brandkit's shape. Run it again to change them:
+// icon, with brand.json in easybrandkit's shape. Run it again to change them:
 //
 //   node test/fixtures/make-fixture.js
 
@@ -19,7 +19,7 @@ const mark = (size) => `<svg width="${size}" height="${size}" viewBox="0 0 64 64
   `<path d="M18 44 L32 16 L46 44" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 34 H40" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>`;
 
 const pages = {
-  // The header logo as brandkit cuts it: on the header's own white ground.
+  // The header logo as easybrandkit cuts it: on the header's own white ground.
   "logo-header.png": { W: 560, H: 240, html: `<body style="margin:0;background:#fff;display:flex;align-items:center;justify-content:center;height:240px;${font}">
     <div style="display:flex;align-items:center;gap:22px">${mark(96)}<b style="font-size:64px;color:${INK};letter-spacing:-.03em">Acme Notes</b></div></body>` },
   "screenshot-1.png": { W: 1440, H: 900, html: `<body style="margin:0;background:#FBFAFF;${font};color:${INK}">

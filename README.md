@@ -10,7 +10,7 @@ npx launch-film linear.app
 
 [Watch the film](.github/assets/linear-film.mp4) (28 seconds). It was made with the command above and nothing else: no brief, no edits.
 
-Tools that make videos with code usually start from a brief: you describe the product, its colors and the style you want. launch-film starts from the site. [brandkit](https://github.com/EminBudak/brandkit) reads the logo, colors, fonts and first screen in a headless browser, the page's own headline and section titles become the film's words, and a look is picked to suit the brand. You get an MP4 at 1920x1080, rendered on your machine with Chrome and ffmpeg. There is no account, no API key and nothing is uploaded.
+Tools that make videos with code usually start from a brief: you describe the product, its colors and the style you want. launch-film starts from the site. [easybrandkit](https://github.com/EminBudak/easybrandkit) reads the logo, colors, fonts and first screen in a headless browser, the page's own headline and section titles become the film's words, and a look is picked to suit the brand. You get an MP4 at 1920x1080, rendered on your machine with Chrome and ffmpeg. There is no account, no API key and nothing is uploaded.
 
 ## Use it with your agent
 
@@ -61,12 +61,12 @@ npx launch-film render <film.json>       render a film.json after editing it
 npx launch-film frames <film.mp4>        save stills of each clip and a contact sheet
 npx launch-film looks | types | icons <word> | doctor
 
-  --out <dir>        folder for the brand, film.json and the film (default ./launch-film-<site>)
-  --look <name>      launch, aurora, gridline, pop or journal (default: picked from the brand)
-  --seconds <n>      aim for 20 to 40 seconds (default 30)
-  --aspect 9:16      a vertical film (default 16:9)
-  --brand <dir>      use a brandkit folder you already have
-  --brandkit <cmd>   the brandkit to run (default: LAUNCH_FILM_BRANDKIT, one on PATH, else @eminbudak/brandkit with npx)
+  --out <dir>           folder for the brand, film.json and the film (default ./launch-film-<site>)
+  --look <name>         launch, aurora, gridline, pop or journal (default: picked from the brand)
+  --seconds <n>         aim for 20 to 40 seconds (default 30)
+  --aspect 9:16         a vertical film (default 16:9)
+  --brand <dir>         use an easybrandkit folder you already have
+  --easybrandkit <cmd>  the easybrandkit to run (default: LAUNCH_FILM_EASYBRANDKIT, one on PATH, else easybrandkit with npx)
   --no-music, --no-sfx, --jobs <n>, --keep
 ```
 
@@ -74,7 +74,7 @@ A run leaves this behind:
 
 ```
 launch-film-linear.app/
-  brand/              brandkit's kit: logos, colors, fonts, first screen
+  brand/              easybrandkit's kit: logos, colors, fonts, first screen
   words.json          the words read from the page
   film.json           the plan, which you can edit and render again
   film.mp4            the film
@@ -83,7 +83,7 @@ launch-film-linear.app/
 
 ## How it works
 
-1. **Brand.** brandkit opens the site in headless Chrome and saves its logos cut on their own background, its button, heading and surface colors, its font families and its first screen at 2x. Given an App Store or Google Play listing, it saves the app's icon, screenshots and rating, and reads the site the listing names.
+1. **Brand.** easybrandkit opens the site in headless Chrome and saves its logos cut on their own background, its button, heading and surface colors, its font families and its first screen at 2x. Given an App Store or Google Play listing, it saves the app's icon, screenshots and rating, and reads the site the listing names.
 2. **Words.** The page's title, description, headline and section titles are read, with the line under each section title. Every word in the film comes from there.
 3. **Plan.** A first film is planned without a brief: the name and its promise, the real screen in a browser window, the page's own sentence as a headline, three sections as feature cards, a number the page states (or an app's store rating), the app's store screenshots, and the logo close with the site's address. It is written to `film.json`.
 4. **Render.** Each clip is an HTML page with one paused timeline. A virtual clock steps it frame by frame in headless Chrome, so every frame is drawn for its time however long drawing takes, and the frames go to ffmpeg. Two clips render at a time.
@@ -114,7 +114,7 @@ launch-film-linear.app/
 | `shots` | two or three store screenshots side by side, coming in from depth |
 | `phone` | a phone's screen capture in a drawn phone |
 | `scroll` | a tall page scrolling in a window |
-| `logo` | the logo close, from a brandkit logo file or an app icon |
+| `logo` | the logo close, from an easybrandkit logo file or an app icon |
 
 Words between asterisks are set in the brand's accent color. A bar is one bar of the look's music, about two seconds; give `seconds` instead if you prefer.
 
@@ -133,7 +133,7 @@ Words between asterisks are set in the brand's accent color. A bar is one bar of
 - Node 22 or newer
 - Google Chrome or Chromium (set `LAUNCH_FILM_CHROME` to use another build)
 - ffmpeg (set `LAUNCH_FILM_FFMPEG` and `LAUNCH_FILM_FFPROBE` to use another build)
-- [brandkit](https://github.com/EminBudak/brandkit): install it with `npm install -g @eminbudak/brandkit`, or launch-film runs it with `npx -y @eminbudak/brandkit` (set `LAUNCH_FILM_BRANDKIT` to use a copy of your own)
+- [easybrandkit](https://github.com/EminBudak/easybrandkit): install it with `npm install -g easybrandkit`, or launch-film runs it with `npx -y easybrandkit` (set `LAUNCH_FILM_EASYBRANDKIT` to use a copy of your own)
 
 Run `npx launch-film doctor` to check. It has been tested on macOS with Chrome 156 and ffmpeg 7.1.
 
@@ -141,7 +141,7 @@ Run `npx launch-film doctor` to check. It has been tested on macOS with Chrome 1
 
 - The film says what the site says. A page with few section titles gives a thin first plan; edit `film.json` or let your agent write the scenes.
 - A brand typeface that Google Fonts does not have is replaced by the look's own, and the render says which.
-- brandkit needs a site that opens in a headless browser. A bot check or a login wall gets no kit, and a social profile is not a brand's site.
+- easybrandkit needs a site that opens in a headless browser. A bot check or a login wall gets no kit, and a social profile is not a brand's site.
 - A 30 second film takes one to three minutes to render on a laptop.
 - The music is simple by design. To use your own track: `ffmpeg -i film.mp4 -i track.mp3 -map 0:v -map 1:a -c:v copy -shortest out.mp4`.
 

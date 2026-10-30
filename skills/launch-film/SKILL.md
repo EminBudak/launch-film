@@ -21,9 +21,9 @@ If ffmpeg is missing, tell the user how to install it (`brew install ffmpeg` on 
 npx -y launch-film plan <url> --out film/<name>
 ```
 
-Give the product's website, or its App Store or Google Play listing (then the listing's icon, screenshots and rating are used, with the colors, fonts and logo of the site it names). Not a social profile: brandkit refuses those.
+Give the product's website, or its App Store or Google Play listing (then the listing's icon, screenshots and rating are used, with the colors, fonts and logo of the site it names). Not a social profile: easybrandkit refuses those.
 
-This takes 30 to 90 seconds. It runs brandkit (logos, colors, fonts, first screen, store screenshots) into `film/<name>/brand/`, reads the words on the page into `words.json`, and writes `film.json`: a first plan that needs no brief.
+This takes 30 to 90 seconds. It runs easybrandkit (logos, colors, fonts, first screen, store screenshots) into `film/<name>/brand/`, reads the words on the page into `words.json`, and writes `film.json`: a first plan that needs no brief.
 
 Then read, in this order:
 
@@ -31,9 +31,9 @@ Then read, in this order:
 - `film/<name>/words.json`: the page's title, description, headings and the line under each heading.
 - `film/<name>/film.json`: the plan.
 
-If the brand looks wrong (a cookie wall, a login page, no logo), tell the user what you got and ask for the logo file or the right page. Do not go on with a wrong brand. If the site answered brandkit with a bot check, there is no kit: ask the user for the logo file and the main colors instead of guessing.
+If the brand looks wrong (a cookie wall, a login page, no logo), tell the user what you got and ask for the logo file or the right page. Do not go on with a wrong brand. If the site answered easybrandkit with a bot check, there is no kit: ask the user for the logo file and the main colors instead of guessing.
 
-If launch-film says brandkit could not be fetched, npx could not download it (no network, or a registry without it): tell the user they can install it with `npm install -g @eminbudak/brandkit`, and use `--brandkit <path to brandkit's scripts/brandkit.js>` when they have a copy.
+If launch-film says easybrandkit could not be fetched, npx could not download it (no network, or a registry without it): tell the user they can install it with `npm install -g easybrandkit`, and use `--easybrandkit <path to easybrandkit's scripts/easybrandkit.js>` when they have a copy.
 
 ## 2. Pick a look
 
@@ -54,7 +54,7 @@ film.json holds `look`, `aspect` (`16:9` or `9:16`) and `clips`, played in order
 | `shots` | two or three store screenshots side by side, as they are | `images` (a list) |
 | `phone` | a phone's own screen capture in a drawn phone (not a store screenshot: many already show a phone) | `image` |
 | `scroll` | a tall page scrolling in a window | `image` |
-| `logo` | the logo close with the site's address | `logo` (a brandkit logo file) or `icon` (an app icon), `site` |
+| `logo` | the logo close with the site's address | `logo` (an easybrandkit logo file) or `icon` (an app icon), `site` |
 
 A scene object has a `type` and its words. List every type and its fields with `npx -y launch-film types`; icon names come from `npx -y launch-film icons <word>`. The ones a launch film uses most:
 
@@ -107,6 +107,6 @@ Fix what you find in film.json and render again. Then give the user the MP4's pa
 ## Options
 
 - `--look <name>`, `--seconds <20-40>`, `--aspect 9:16` on `plan` or the one-go command.
-- `--brand <folder>` uses a brandkit folder you already have; `--words <file>` a words.json you already have.
+- `--brand <folder>` uses an easybrandkit folder you already have; `--words <file>` a words.json you already have.
 - `--no-music`, `--no-sfx` on the one-go command; or set `"music": false` and `"sfx": false` in film.json.
 - `--jobs 1` renders one clip at a time on a slow machine.

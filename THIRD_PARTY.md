@@ -41,9 +41,9 @@ No font files are in this package. When a film renders, its typefaces are downlo
 
 They are embedded in the pages that are rendered, and reach the film only as pixels.
 
-### brandkit
+### easybrandkit
 
-`launch-film <url>` and `launch-film plan <url>` run [brandkit](https://github.com/EminBudak/brandkit) (`@eminbudak/brandkit` on npm, MIT, by the same author) to read the site: a brandkit installed on PATH (`npm install -g @eminbudak/brandkit`), or else `npx -y @eminbudak/brandkit`, and `npx -y github:EminBudak/brandkit` when npm cannot give it. `LAUNCH_FILM_BRANDKIT` names another command.
+`launch-film <url>` and `launch-film plan <url>` run [easybrandkit](https://github.com/EminBudak/easybrandkit) (MIT, by the same author) to read the site: an easybrandkit installed on PATH (`npm install -g easybrandkit`), or else `npx -y easybrandkit`, and `npx -y github:EminBudak/easybrandkit` when npm cannot give it. `LAUNCH_FILM_EASYBRANDKIT` names another command.
 
 ## Used from your machine, not shipped
 

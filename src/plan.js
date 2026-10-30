@@ -170,7 +170,7 @@ function findNumber(texts) {
   return null;
 }
 
-// The headings to take copy from. brandkit's are the ones the page shows,
+// The headings to take copy from. easybrandkit's are the ones the page shows,
 // in reading order, without the navigation and footer; the page as read
 // here adds the line under each. A store listing's feature lines (read
 // here from its description) come first when there are any.
@@ -184,7 +184,7 @@ function mergeHeadings(kit, read) {
 
 // The copy a film needs, from the page's words and the brand.
 function copyFrom(brand, words) {
-  // The page's words as read, filled in from brandkit's where they are thin.
+  // The page's words as read; where they are thin, easybrandkit's fill in.
   const read = words || {};
   const kit = brand.text || {};
   const w = {
