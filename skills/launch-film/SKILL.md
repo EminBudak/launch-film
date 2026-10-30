@@ -33,7 +33,7 @@ Then read, in this order:
 
 If the brand looks wrong (a cookie wall, a login page, no logo), tell the user what you got and ask for the logo file or the right page. Do not go on with a wrong brand. If the site answered brandkit with a bot check, there is no kit: ask the user for the logo file and the main colors instead of guessing.
 
-If launch-film says brandkit was not found, brandkit is not installed: tell the user, and use `--brandkit <path to brandkit's scripts/brandkit.js>` when they have a copy.
+If launch-film says brandkit could not be fetched, npx could not download it (no network, or a registry without it): tell the user they can install it with `npm install -g @eminbudak/brandkit`, and use `--brandkit <path to brandkit's scripts/brandkit.js>` when they have a copy.
 
 ## 2. Pick a look
 

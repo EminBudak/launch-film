@@ -34,28 +34,42 @@ const normHex = (v) => {
   return `#${h.toUpperCase()}`;
 };
 
-// The command that runs brandkit: the one given (a command, or the path of
-// brandkit's script), else LAUNCH_FILM_BRANDKIT, else a brandkit installed
-// on PATH, else brandkit's own repository through npx. (Not "npx brandkit":
-// that name is not brandkit's on npm yet, and npx would run whatever
-// package holds it.)
-function brandkitCommand(given = "") {
+// The commands that may run brandkit, in the order they are tried: the one
+// given (a command, or the path of brandkit's script), else
+// LAUNCH_FILM_BRANDKIT, else a brandkit installed on PATH, else brandkit
+// from npm through npx, then from its GitHub repository when npm cannot
+// give it. On npm it is @eminbudak/brandkit; its command is still brandkit.
+function brandkitCommands(given = "") {
   const raw = String(given || process.env.LAUNCH_FILM_BRANDKIT || "").trim();
   if (raw) {
-    if (/\.(c?js|mjs)$/i.test(raw) && fs.existsSync(raw)) return [process.execPath, raw];
-    return raw.split(" ").filter(Boolean);
+    if (/\.(c?js|mjs)$/i.test(raw) && fs.existsSync(raw)) return [[process.execPath, raw]];
+    return [raw.split(" ").filter(Boolean)];
   }
   const installed = onPath(process.platform === "win32" ? "brandkit.cmd" : "brandkit");
-  if (installed) return [installed];
-  return [process.platform === "win32" ? "npx.cmd" : "npx", "-y", "github:EminBudak/brandkit"];
+  if (installed) return [[installed]];
+  const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+  return [[npx, "-y", "@eminbudak/brandkit"], [npx, "-y", "github:EminBudak/brandkit"]];
 }
 
-const HOW = "Install brandkit (npm install -g github:EminBudak/brandkit), or point LAUNCH_FILM_BRANDKIT (or --brandkit) at its scripts/brandkit.js, or give a kit you already have with --brand.";
+const HOW = "Install brandkit (npm install -g @eminbudak/brandkit), or point LAUNCH_FILM_BRANDKIT (or --brandkit) at its scripts/brandkit.js, or give a kit you already have with --brand.";
 
 // Runs brandkit for a URL into a folder. Resolves the path of brand.json.
-function runBrandkit(url, dir, { log = () => {}, command = "" } = {}) {
+// The next command is tried only when npx could not fetch brandkit; when
+// brandkit itself ran and failed, running it again would fail the same way.
+async function runBrandkit(url, dir, { log = () => {}, command = "" } = {}) {
+  const commands = brandkitCommands(command);
+  for (const [i, cmd] of commands.entries()) {
+    try {
+      return await runOnce(cmd, url, dir, log);
+    } catch (err) {
+      if (!err.unfetched || i === commands.length - 1) throw err;
+      log(`${err.message.split(". ")[0]}; trying ${commands[i + 1].join(" ")}\n`);
+    }
+  }
+}
+
+function runOnce([cmd, ...pre], url, dir, log) {
   return new Promise((resolve, reject) => {
-    const [cmd, ...pre] = brandkitCommand(command);
     const child = spawn(cmd, [...pre, url, "--out", dir], { stdio: ["ignore", "pipe", "pipe"] });
     let out = "";
     child.stdout.on("data", (d) => {
@@ -70,7 +84,10 @@ function runBrandkit(url, dir, { log = () => {}, command = "" } = {}) {
     child.on("close", (code) => {
       if (code === 0 && fs.existsSync(path.join(dir, "brand.json"))) return resolve(path.join(dir, "brand.json"));
       const said = out.trim().split("\n").filter(Boolean).slice(-2).join(" ");
-      if (/E404|404 Not Found|could not determine executable|ENOTFOUND|EAI_AGAIN/i.test(out)) reject(new Error(`brandkit could not be fetched. ${HOW}`));
+      // npm's own error lines mean npx could not fetch brandkit (no such
+      // package, no network) before it ran; brandkit never prints them.
+      const npm = /^npm (?:error|ERR!) code \S+/m.exec(out) || /^npm (?:error|ERR!) .+/m.exec(out);
+      if (npm) reject(Object.assign(new Error(`brandkit could not be fetched (${npm[0].trim()}). ${HOW}`), { unfetched: true }));
       else if (/bot check/i.test(out)) reject(new Error(`${said} The brand could not be read: ask for the logo file and the main colors, or give a kit with --brand.`));
       else reject(new Error(`brandkit failed (exit ${code})${said ? `: ${said}` : ""}`));
     });
@@ -199,4 +216,4 @@ function pickLook(brand) {
   return "gridline";
 }
 
-module.exports = { runBrandkit, brandkitCommand, readBrand, pickLook, familyName, luminance, saturation, hue, normHex };
+module.exports = { runBrandkit, brandkitCommands, readBrand, pickLook, familyName, luminance, saturation, hue, normHex };

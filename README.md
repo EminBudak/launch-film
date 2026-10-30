@@ -66,7 +66,7 @@ npx launch-film looks | types | icons <word> | doctor
   --seconds <n>      aim for 20 to 40 seconds (default 30)
   --aspect 9:16      a vertical film (default 16:9)
   --brand <dir>      use a brandkit folder you already have
-  --brandkit <cmd>   the brandkit to run (default: LAUNCH_FILM_BRANDKIT, one on PATH, else its GitHub repository)
+  --brandkit <cmd>   the brandkit to run (default: LAUNCH_FILM_BRANDKIT, one on PATH, else @eminbudak/brandkit with npx)
   --no-music, --no-sfx, --jobs <n>, --keep
 ```
 
@@ -133,7 +133,7 @@ Words between asterisks are set in the brand's accent color. A bar is one bar of
 - Node 22 or newer
 - Google Chrome or Chromium (set `LAUNCH_FILM_CHROME` to use another build)
 - ffmpeg (set `LAUNCH_FILM_FFMPEG` and `LAUNCH_FILM_FFPROBE` to use another build)
-- [brandkit](https://github.com/EminBudak/brandkit), which launch-film runs with `npx -y github:EminBudak/brandkit` unless one is installed (set `LAUNCH_FILM_BRANDKIT` to use a copy of your own)
+- [brandkit](https://github.com/EminBudak/brandkit): install it with `npm install -g @eminbudak/brandkit`, or launch-film runs it with `npx -y @eminbudak/brandkit` (set `LAUNCH_FILM_BRANDKIT` to use a copy of your own)
 
 Run `npx launch-film doctor` to check. It has been tested on macOS with Chrome 156 and ffmpeg 7.1.
 

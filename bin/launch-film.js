@@ -25,7 +25,8 @@ Options:
                        the page again.
   --brandkit <cmd>     The brandkit to run: a command, or the path of its
                        scripts/brandkit.js (default: LAUNCH_FILM_BRANDKIT, a
-                       brandkit on PATH, else brandkit from GitHub with npx).
+                       brandkit on PATH, else @eminbudak/brandkit with npx).
+                       Install it with npm install -g @eminbudak/brandkit.
   --look <name>        launch, aurora, gridline, pop or journal (default: picked
                        from the brand).
   --seconds <n>        Aim for this length, 20-40 (default 30).

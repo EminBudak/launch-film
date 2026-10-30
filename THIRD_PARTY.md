@@ -43,7 +43,7 @@ They are embedded in the pages that are rendered, and reach the film only as pix
 
 ### brandkit
 
-`launch-film <url>` and `launch-film plan <url>` run [brandkit](https://github.com/EminBudak/brandkit) (MIT, by the same author) to read the site: a brandkit installed on PATH, or else `npx -y github:EminBudak/brandkit`. `LAUNCH_FILM_BRANDKIT` names another command.
+`launch-film <url>` and `launch-film plan <url>` run [brandkit](https://github.com/EminBudak/brandkit) (`@eminbudak/brandkit` on npm, MIT, by the same author) to read the site: a brandkit installed on PATH (`npm install -g @eminbudak/brandkit`), or else `npx -y @eminbudak/brandkit`, and `npx -y github:EminBudak/brandkit` when npm cannot give it. `LAUNCH_FILM_BRANDKIT` names another command.
 
 ## Used from your machine, not shipped
 
