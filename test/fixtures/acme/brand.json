@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "url": "https://acme-notes.example/",
+  "name": "Acme Notes",
+  "colors": [
+    {
+      "hex": "#5B4FE9",
+      "role": "button"
+    },
+    {
+      "hex": "#16151D",
+      "role": "heading"
+    },
+    {
+      "hex": "#5A5870",
+      "role": "link"
+    },
+    {
+      "hex": "#FFFFFF",
+      "role": "header"
+    },
+    {
+      "hex": "#FBFAFF",
+      "role": "surface"
+    }
+  ],
+  "fonts": {
+    "heading": "Inter",
+    "body": "Inter"
+  },
+  "logos": [
+    {
+      "file": "logo-header.png",
+      "where": "header",
+      "kind": "img",
+      "background": "#FFFFFF",
+      "width": 560,
+      "height": 240,
+      "src": "https://acme-notes.example/logo.svg",
+      "alt": "Acme Notes"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "screenshot-1.png",
+      "width": 1440,
+      "height": 900
+    }
+  ],
+  "icons": [],
+  "images": [],
+  "manifest": null,
+  "links": [
+    {
+      "type": "appstore",
+      "url": "https://apps.apple.com/app/id0000000000",
+      "from": "footer"
+    }
+  ],
+  "stores": [
+    {
+      "type": "appstore",
+      "url": "https://apps.apple.com/app/id0000000000",
+      "ok": true,
+      "name": "Acme Notes",
+      "by": "Acme",
+      "description": "Notes that link themselves.",
+      "assets": [
+        {
+          "file": "app-icon.png",
+          "kind": "icon",
+          "width": 512,
+          "height": 512,
+          "alpha": false
+        },
+        {
+          "file": "appstore-1.png",
+          "kind": "screenshot",
+          "width": 645,
+          "height": 1398,
+          "alpha": false
+        }
+      ]
+    }
+  ],
+  "notes": []
+}

@@ -1,0 +1,6 @@
+node_modules/
+launch-film-*/
+film/
+*.log
+.DS_Store
+test/fixtures/acme/.film-*.json

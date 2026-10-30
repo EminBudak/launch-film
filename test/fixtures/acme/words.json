@@ -1,0 +1,42 @@
+{
+  "lang": "en",
+  "title": "Acme Notes | Notes that think with you",
+  "description": "Write once and find it anywhere. Acme links your notes, meetings and tasks on its own.",
+  "siteName": "Acme Notes",
+  "ogTitle": "",
+  "ogDescription": "",
+  "jsonld": [],
+  "ctas": [
+    "Start free"
+  ],
+  "paragraphs": [
+    "Trusted by 12,000+ teams worldwide"
+  ],
+  "headings": [
+    {
+      "level": 1,
+      "text": "Notes that think with you",
+      "after": "Write once and find it anywhere."
+    },
+    {
+      "level": 2,
+      "text": "Everything links itself",
+      "after": "Acme reads what you write and connects it."
+    },
+    {
+      "level": 3,
+      "text": "Instant search",
+      "after": "Find any note in a blink, even offline."
+    },
+    {
+      "level": 3,
+      "text": "Private by design",
+      "after": "Your notes are encrypted end to end."
+    },
+    {
+      "level": 3,
+      "text": "Shared spaces",
+      "after": "Plan launches together with your team."
+    }
+  ]
+}

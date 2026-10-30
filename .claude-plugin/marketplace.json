@@ -1,0 +1,23 @@
+{
+  "name": "launch-film",
+  "description": "launch-film: a 20 to 40 second launch film made from a product's own site, with its real logo, colors, fonts and screens.",
+  "owner": {
+    "name": "Emin Budak"
+  },
+  "plugins": [
+    {
+      "name": "launch-film",
+      "description": "Plans, renders and checks a launch film (MP4 with music and sound effects) for a product from its website or App Store page. Renders locally with Chrome and ffmpeg.",
+      "version": "0.1.0",
+      "source": "./",
+      "skills": ["./skills/launch-film"],
+      "author": {
+        "name": "Emin Budak"
+      },
+      "homepage": "https://github.com/EminBudak/launch-film",
+      "repository": "https://github.com/EminBudak/launch-film",
+      "license": "MIT",
+      "keywords": ["skills", "video", "launch", "motion-design", "brand"]
+    }
+  ]
+}
