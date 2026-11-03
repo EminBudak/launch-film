@@ -50,6 +50,12 @@ cp -r launch-film/skills/launch-film ~/.agents/skills/
 cp -r launch-film/skills/launch-film ~/.cursor/skills/
 ```
 
+In GitHub Copilot CLI, install it from the repo:
+
+```bash
+copilot plugin install EminBudak/launch-film
+```
+
 Then ask as usual:
 
 > Make a launch video for linear.app
