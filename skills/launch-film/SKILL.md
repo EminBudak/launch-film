@@ -10,7 +10,7 @@ A launch film made from the product itself: its logo cut from its own page, its 
 The tool is the `launch-film` npm package. It needs Node 22 or newer, Chrome or Chromium, and ffmpeg. Check them first:
 
 ```bash
-npx -y launch-film doctor
+npx -y launch-film@latest doctor
 ```
 
 If ffmpeg is missing, tell the user how to install it (`brew install ffmpeg` on a Mac, `sudo apt install ffmpeg` on Debian or Ubuntu) and stop.
@@ -18,7 +18,7 @@ If ffmpeg is missing, tell the user how to install it (`brew install ffmpeg` on 
 ## 1. Get the brand and a first plan
 
 ```bash
-npx -y launch-film plan <url> --out film/<name>
+npx -y launch-film@latest plan <url> --out film/<name>
 ```
 
 Give the product's website, or its App Store or Google Play listing (then the listing's icon, screenshots and rating are used, with the colors, fonts and logo of the site it names). Not a social profile: easybrandkit refuses those.
@@ -38,7 +38,7 @@ If launch-film says easybrandkit could not be fetched, npx could not download it
 ## 2. Pick a look
 
 ```bash
-npx -y launch-film looks
+npx -y launch-film@latest looks
 ```
 
 The plan already picked one from the brand: `launch` (dark stage, depth, one bright accent) for dark sites and developer tools, `aurora` (frosted glass over soft color) for vivid consumer and AI products, `gridline` (Swiss grid on paper) for light B2B sites, `pop` (full color fields, stickers) for consumer apps, `journal` (serif headlines on warm paper) for editorial brands. Change `"look"` in film.json if the user asked for a style or another one fits better.
@@ -56,7 +56,7 @@ film.json holds `look`, `aspect` (`16:9` or `9:16`) and `clips`, played in order
 | `scroll` | a tall page scrolling in a window | `image` |
 | `logo` | the logo close with the site's address | `logo` (an easybrandkit logo file) or `icon` (an app icon), `site` |
 
-A scene object has a `type` and its words. List every type and its fields with `npx -y launch-film types`; icon names come from `npx -y launch-film icons <word>`. The ones a launch film uses most:
+A scene object has a `type` and its words. List every type and its fields with `npx -y launch-film@latest types`; icon names come from `npx -y launch-film@latest icons <word>`. The ones a launch film uses most:
 
 ```json
 { "type": "opener", "title": "Acme Notes", "text": "Notes that think with you" }
@@ -79,7 +79,7 @@ Words between asterisks are set in the accent color. Rules for the words:
 ## 4. Render
 
 ```bash
-npx -y launch-film render film/<name>/film.json
+npx -y launch-film@latest render film/<name>/film.json
 ```
 
 Clips render two at a time; a 30 second film takes one to three minutes. The film is `film/<name>/film.mp4`. If a clip fails, the message names it: fix film.json and render again.
@@ -87,7 +87,7 @@ Clips render two at a time; a 30 second film takes one to three minutes. The fil
 ## 5. Look at the frames before you hand it over
 
 ```bash
-npx -y launch-film frames film/<name>/film.mp4
+npx -y launch-film@latest frames film/<name>/film.mp4
 ```
 
 Open `film/<name>/frames/sheet.jpg` and the stills next to it, two for each clip. Check:
@@ -102,7 +102,7 @@ Fix what you find in film.json and render again. Then give the user the MP4's pa
 
 ## Without a plan step
 
-`npx -y launch-film <url>` does all of the above in one go with the first plan, and saves the frames. Use it when the user wants a film quickly and has no wishes about the words.
+`npx -y launch-film@latest <url>` does all of the above in one go with the first plan, and saves the frames. Use it when the user wants a film quickly and has no wishes about the words.
 
 ## Options
 
