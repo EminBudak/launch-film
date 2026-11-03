@@ -48,7 +48,7 @@ function easybrandkitCommands(given = "") {
   const installed = onPath(process.platform === "win32" ? "easybrandkit.cmd" : "easybrandkit");
   if (installed) return [[installed]];
   const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-  return [[npx, "-y", "easybrandkit"], [npx, "-y", "github:EminBudak/easybrandkit"]];
+  return [[npx, "-y", "easybrandkit@latest"], [npx, "-y", "github:EminBudak/easybrandkit"]];
 }
 
 const HOW = "Install easybrandkit (npm install -g easybrandkit), or point LAUNCH_FILM_EASYBRANDKIT (or --easybrandkit) at its scripts/easybrandkit.js, or give a kit you already have with --brand.";

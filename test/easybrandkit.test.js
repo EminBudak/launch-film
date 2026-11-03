@@ -45,7 +45,7 @@ test("the easybrandkit to run: a script path, a command, one on PATH, else npm a
   assert.deepEqual(easybrandkitCommands("my-easybrandkit --flag"), [["my-easybrandkit", "--flag"]]);
   await withPath(dir, () => {
     const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    assert.deepEqual(easybrandkitCommands(), [[npx, "-y", "easybrandkit"], [npx, "-y", "github:EminBudak/easybrandkit"]]);
+    assert.deepEqual(easybrandkitCommands(), [[npx, "-y", "easybrandkit@latest"], [npx, "-y", "github:EminBudak/easybrandkit"]]);
     const installed = path.join(dir, process.platform === "win32" ? "easybrandkit.cmd" : "easybrandkit");
     fs.writeFileSync(installed, "", { mode: 0o755 });
     assert.deepEqual(easybrandkitCommands(), [[installed]]);
@@ -53,19 +53,19 @@ test("the easybrandkit to run: a script path, a command, one on PATH, else npm a
 });
 
 test("when npx cannot fetch easybrandkit from npm, it is fetched from GitHub", { skip: noShell }, async () => {
-  await withFakeNpx({ "easybrandkit": NOT_ON_NPM, "github:EminBudak/easybrandkit": WRITES_KIT }, async (dir, asked) => {
+  await withFakeNpx({ "easybrandkit@latest": NOT_ON_NPM, "github:EminBudak/easybrandkit": WRITES_KIT }, async (dir, asked) => {
     assert.equal(await runEasybrandkit("https://example.com", path.join(dir, "out")), path.join(dir, "out", "brand.json"));
-    assert.deepEqual(asked(), ["easybrandkit", "github:EminBudak/easybrandkit"]);
+    assert.deepEqual(asked(), ["easybrandkit@latest", "github:EminBudak/easybrandkit"]);
   });
-  await withFakeNpx({ "easybrandkit": NOT_ON_NPM, "github:EminBudak/easybrandkit": NOT_ON_NPM }, async (dir) => {
+  await withFakeNpx({ "easybrandkit@latest": NOT_ON_NPM, "github:EminBudak/easybrandkit": NOT_ON_NPM }, async (dir) => {
     await assert.rejects(runEasybrandkit("https://example.com", path.join(dir, "out")), /could not be fetched \(npm error code E404\)\. Install easybrandkit \(npm install -g easybrandkit\)/);
   });
 });
 
 test("an easybrandkit that ran and failed is not run again", { skip: noShell }, async () => {
-  await withFakeNpx({ "easybrandkit": CANNOT_OPEN, "github:EminBudak/easybrandkit": WRITES_KIT }, async (dir, asked) => {
+  await withFakeNpx({ "easybrandkit@latest": CANNOT_OPEN, "github:EminBudak/easybrandkit": WRITES_KIT }, async (dir, asked) => {
     await assert.rejects(runEasybrandkit("https://example.com", path.join(dir, "out")), /easybrandkit failed \(exit 1\).*Could not open https:\/\/example\.com/);
-    assert.deepEqual(asked(), ["easybrandkit"]);
+    assert.deepEqual(asked(), ["easybrandkit@latest"]);
   });
 });
 
