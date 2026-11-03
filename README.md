@@ -3,7 +3,7 @@
 A 20 to 40 second launch film made from a product's own website or App Store page: its real logo, colors, fonts and screens, set in motion with music and sound effects.
 
 ```bash
-npx launch-film linear.app
+npx launch-film@latest linear.app
 ```
 
 ![Stills from the film launch-film made for linear.app](.github/assets/linear-sheet.jpg)
