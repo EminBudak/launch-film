@@ -16,12 +16,13 @@ function available() {
   return m ? m[1] : "unknown";
 }
 
-// Runs ffmpeg and resolves { code, stderr } (the end of it).
-function run(args, { input = null, timeout = 0 } = {}) {
+// Runs ffmpeg and resolves { code, stderr } (the end of it). A filter's own
+// report (ebur128's summary) needs loglevel "info".
+function run(args, { input = null, timeout = 0, loglevel = "error" } = {}) {
   return new Promise((resolve) => {
-    const child = spawn(FFMPEG, ["-hide_banner", "-loglevel", "error", "-y", ...args], { stdio: [input ? "pipe" : "ignore", "ignore", "pipe"] });
+    const child = spawn(FFMPEG, ["-hide_banner", "-nostats", "-loglevel", loglevel, "-y", ...args], { stdio: [input ? "pipe" : "ignore", "ignore", "pipe"] });
     let stderr = "";
-    child.stderr.on("data", (d) => (stderr = (stderr + d).slice(-3000)));
+    child.stderr.on("data", (d) => (stderr = (stderr + d).slice(-6000)));
     let timer = null;
     if (timeout) {
       timer = setTimeout(() => child.kill("SIGKILL"), timeout);
@@ -45,21 +46,44 @@ async function mustRun(args, what, opts) {
   return r;
 }
 
+// "30000/1001" as a number.
+const rate = (r) => {
+  const [a, b] = String(r || "").split("/").map(Number);
+  return a && b ? a / b : Number(a) || 0;
+};
+
 function probe(file) {
-  const r = spawnSync(FFPROBE, ["-v", "error", "-show_entries", "format=duration:stream=codec_type,width,height", "-of", "json", file],
-    { encoding: "utf8", timeout: 20_000 });
+  const r = spawnSync(FFPROBE, ["-v", "error", "-show_entries",
+    "format=duration:stream=codec_type,codec_name,width,height,pix_fmt,sample_aspect_ratio,r_frame_rate,avg_frame_rate,sample_rate,channels",
+    "-of", "json", file], { encoding: "utf8", timeout: 20_000 });
   try {
     const info = JSON.parse(r.stdout);
     const video = (info.streams || []).find((s) => s.codec_type === "video") || {};
+    const sound = (info.streams || []).find((s) => s.codec_type === "audio") || null;
     return {
       width: Number(video.width) || 0,
       height: Number(video.height) || 0,
       duration: Number((info.format || {}).duration) || 0,
-      audio: (info.streams || []).some((s) => s.codec_type === "audio"),
+      audio: Boolean(sound),
+      fps: rate(video.avg_frame_rate) || rate(video.r_frame_rate),
+      baseFps: rate(video.r_frame_rate),
+      codec: video.codec_name || "",
+      pixFmt: video.pix_fmt || "",
+      sar: video.sample_aspect_ratio || "",
+      audioCodec: sound ? sound.codec_name || "" : "",
+      sampleRate: sound ? Number(sound.sample_rate) || 0 : 0,
+      channels: sound ? Number(sound.channels) || 0 : 0,
     };
   } catch {
-    return { width: 0, height: 0, duration: 0, audio: false };
+    return { width: 0, height: 0, duration: 0, audio: false, fps: 0, baseFps: 0, codec: "", pixFmt: "", sar: "", audioCodec: "", sampleRate: 0, channels: 0 };
   }
+}
+
+// A picture made exactly W x H: scaled to cover the size and cut to it from
+// the middle, as an opaque PNG (stores refuse transparency).
+function coverPng(input, output, W, H) {
+  return mustRun(["-i", input, "-vf", `scale=${W}:${H}:force_original_aspect_ratio=increase:flags=lanczos,crop=${W}:${H},setsar=1`,
+    "-frames:v", "1", "-pix_fmt", "rgb24", output], `making ${output}`);
 }
 
 // A picture's pixels as RGBA, at most `max` px on its long side when given:
@@ -104,4 +128,4 @@ function encoder({ output, fps = 25, crf = 15 }) {
   };
 }
 
-module.exports = { FFMPEG, FFPROBE, available, run, mustRun, probe, readPixels, writePng, encoder };
+module.exports = { FFMPEG, FFPROBE, available, run, mustRun, probe, coverPng, readPixels, writePng, encoder };

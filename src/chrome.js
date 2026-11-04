@@ -304,4 +304,36 @@ async function stillOf({ html, files = {}, at = 0, W = 1920, H = 1080, scale = 1
   }
 }
 
-module.exports = { findChrome, onPath, launch, openPage, renderPage, stillOf, evaluate, CLOCK };
+// PNGs of pages, one browser for them all. Each page { html, files, W, H,
+// at, until } is shot at `at` ms, or once its entrances have played when
+// `at` is "end" (but not after `until`).
+async function snapshots(pages) {
+  const browser = await launch({ W: 1920, H: 1080 });
+  const out = [];
+  try {
+    for (const p of pages) {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "launch-film-page-"));
+      try {
+        fs.writeFileSync(path.join(dir, "index.html"), p.html);
+        for (const [name, data] of Object.entries(p.files || {})) fs.writeFileSync(path.join(dir, name), data);
+        const { page, exceptions } = await openPage(browser, dir, { W: p.W, H: p.H, scale: p.scale || 1 });
+        let at = p.at || 0;
+        if (at === "end") at = Math.round(Number(await evaluate(page, "window.__end ? window.__end() : 0")) || 0) + 150;
+        if (p.until) at = Math.min(at, p.until);
+        // The clock moves forward to the time, as in a render.
+        for (let ms = 0; ms < at; ms += 40) await evaluate(page, `__lfAdvance(${ms})`);
+        await evaluate(page, `__lfAdvance(${at}); if (window.__fit) window.__fit(); true`);
+        const shot = await page.call("Page.captureScreenshot", { format: "png" });
+        out.push({ png: Buffer.from(shot.data, "base64"), errors: exceptions });
+        await browser.send("Target.closeTarget", { targetId: page.targetId }).catch(() => {});
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  } finally {
+    browser.close();
+  }
+  return out;
+}
+
+module.exports = { findChrome, onPath, launch, openPage, renderPage, stillOf, snapshots, evaluate, CLOCK };

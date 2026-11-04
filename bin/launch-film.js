@@ -12,6 +12,12 @@ Usage:
   launch-film plan <url> [options]     Read the brand and write film.json only.
   launch-film render <film.json>       Render a film.json (after editing it).
   launch-film frames <film.mp4>        Save stills of each clip and a contact sheet.
+  launch-film check <film.mp4>         Check a render by measuring it: size, frame
+                                       rate, length, black, still and silent
+                                       stretches, loudness, peaks, cuts on the beat.
+  launch-film stills <url|film.json>   Launch pictures at the sizes Product Hunt,
+                                       link previews, X, Google Play and the
+                                       Chrome Web Store ask for.
   launch-film looks                    List the looks.
   launch-film types                    List the scene types and their fields.
   launch-film icons <word>             Find icon names for a scene.
@@ -37,6 +43,20 @@ Options:
   --no-music           Leave out the music bed.
   --no-sfx             Leave out the sound effects.
   --keep               Keep the work files (each clip's MP4).
+
+Check options (CHECK.md, check.json, sheet.png and wave.png go to --out,
+default check/ next to the film; it exits with 1 when the film fails):
+  --expect <WxH@fps>   The size and frame rate, like 1920x1080@30.
+  --seconds <n>        The length: 30 (give or take half a second) or 28-32.
+  --lufs <n>           The integrated loudness, like -14 (give or take 1 LU).
+  --cues <file>        The music's cues.json, to check the cuts on the beat.
+  --cuts <list|file>   The cuts in seconds (3.2,7.5) or a JSON file, when the
+                       film has no timeline from launch-film.
+  --allow <stretches>  Stretches meant to hold still, black or silent, in
+                       seconds, like 27-30,0-0.5.
+
+Stills options (the pictures and STILLS.md go to stills/ next to film.json):
+  --for <targets>      Any of ph, og, x, play, chrome (default: all of them).
 
 Everything renders on this machine with Chrome and ffmpeg. No account or key.
 `;
@@ -209,6 +229,33 @@ async function main() {
   if (command === "frames") {
     if (!rest[0]) fail("give the film's MP4");
     await frames(path.resolve(rest[0]), flags);
+    return;
+  }
+  if (command === "check") {
+    if (!rest[0]) fail("give the film's MP4 to check");
+    const { checkFilm } = require("../src/check");
+    const r = await checkFilm(path.resolve(rest[0]), { out: flags.out, expect: flags.expect, seconds: flags.seconds, lufs: flags.lufs, cues: flags.cues, cuts: flags.cuts, allow: flags.allow });
+    for (const c of r.checks.filter((x) => x.status === "fail" || x.status === "warn")) say(`  ${c.status.padEnd(5)} ${c.name}: ${c.found}${c.expected ? ` (asked for ${c.expected})` : ""}\n`);
+    say(`${r.pass ? "PASS" : "FAIL"}${r.warnings.length ? `, ${r.warnings.length} warning${r.warnings.length > 1 ? "s" : ""}` : ""}: ${path.relative(process.cwd(), path.join(r.dir, "CHECK.md"))}\n`);
+    if (!r.pass) process.exitCode = 1;
+    return;
+  }
+  if (command === "stills") {
+    if (!rest[0]) fail("give the site's address or a film.json, e.g. launch-film stills example.com --for ph,og");
+    const { makeStills, parseTargets } = require("../src/stills");
+    parseTargets(flags.for);
+    let filmFile;
+    if (/\.json$/i.test(rest[0])) {
+      filmFile = path.resolve(rest[0]);
+      if (!fs.existsSync(filmFile)) fail(`${rest[0]} is not a file`);
+    } else {
+      const url = normaliseUrl(rest[0]);
+      if (!url) fail(`"${rest[0]}" is not an address or a film.json`);
+      ({ filmFile } = await makePlan(url, flags));
+    }
+    const r = await makeStills(filmFile, { targets: flags.for, log: say });
+    for (const note of r.notes) say(`note: ${note}\n`);
+    say(`Made ${r.files.length} stills: ${path.relative(process.cwd(), path.join(r.dir, "STILLS.md"))}\n`);
     return;
   }
   const isPlan = command === "plan";

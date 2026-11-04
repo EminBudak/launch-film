@@ -154,29 +154,35 @@ async function buildClip(clip, ctx) {
     await mustRun(["-i", clip.imageFile, "-vf", `crop=${info.width}:${keepH}:0:0,scale=${width}:-2:flags=lanczos`, "-frames:v", "1", prepared], `clip ${clip.index + 1}`);
     return { html: page.html, files: { "screen.png": fs.readFileSync(prepared) }, cues: page.cues, W: page.W, H: page.H };
   }
-  // The logo close: the capture asked for, else the brand's other logo
-  // captures, else its app icon. A capture that cannot close (cut off, too
-  // small, not a logo) is passed over with a note.
+  // The logo close.
   const markFile = path.join(work, `mark-${clip.index}.png`);
-  const brand = ctx.brand;
-  const tries = clip.iconFile ? [{ icon: clip.iconFile }] : [{ logo: clip.logoFile },
-    ...(brand ? brand.logos.map((l) => ({ logo: l.file })).filter((t) => t.logo !== clip.logoFile) : []),
+  const mark = await markFor({ logoFile: clip.logoFile, iconFile: clip.iconFile, brand: ctx.brand, out: markFile, portrait: port, notes: ctx.notes, what: "The logo close" });
+  if (!mark.file) throw new Error(`clip ${clip.index + 1}: no logo could close the film: ${mark.refused.join("; ")}`);
+  const page = motion.logoHtml({ style: look, portrait: port, brand: colours, mark: { file: "mark.png", w: mark.w, h: mark.h, icon: Boolean(mark.icon) },
+    ground: mark.ground, site: clip.site || "", lang: ctx.lang }, { fonts, seconds, icon: iconSvg });
+  return { html: page.html, files: { "mark.png": fs.readFileSync(markFile) }, cues: page.cues, W: page.W, H: page.H };
+}
+
+// The mark a close or a still shows: the capture asked for, else the brand's
+// other logo captures, else its app icon. A capture that cannot close (cut
+// off, too small, not a logo) is passed over with a note. Returns the
+// prepared mark ({ file, w, h, ground, icon }), or { refused } when none
+// would do.
+async function markFor({ logoFile = null, iconFile = null, brand = null, out, portrait = false, notes = [], what }) {
+  const tries = iconFile ? [{ icon: iconFile }] : [...(logoFile ? [{ logo: logoFile }] : []),
+    ...(brand ? brand.logos.map((l) => ({ logo: l.file })).filter((t) => t.logo !== logoFile) : []),
     ...(brand && brand.appIcon ? [{ icon: brand.appIcon.file }] : [])];
-  let mark = null;
   const refused = [];
   for (const t of tries) {
     try {
-      mark = t.icon ? await prepareIcon(t.icon, markFile) : await prepareLogo(t.logo, markFile, { portrait: port });
-      if (refused.length) ctx.notes.push(`The logo close uses ${path.basename(t.icon || t.logo)}: ${refused.join("; ")}.`);
-      break;
+      const mark = t.icon ? await prepareIcon(t.icon, out) : await prepareLogo(t.logo, out, { portrait });
+      if (refused.length) notes.push(`${what} uses ${path.basename(t.icon || t.logo)}: ${refused.join("; ")}.`);
+      return mark;
     } catch (err) {
       refused.push(`${path.basename(t.icon || t.logo)} was passed over (${err.message})`);
     }
   }
-  if (!mark) throw new Error(`clip ${clip.index + 1}: no logo could close the film: ${refused.join("; ")}`);
-  const page = motion.logoHtml({ style: look, portrait: port, brand: colours, mark: { file: "mark.png", w: mark.w, h: mark.h, icon: Boolean(mark.icon) },
-    ground: mark.ground, site: clip.site || "", lang: ctx.lang }, { fonts, seconds, icon: iconSvg });
-  return { html: page.html, files: { "mark.png": fs.readFileSync(markFile) }, cues: page.cues, W: page.W, H: page.H };
+  return { file: null, refused };
 }
 
 // Runs tasks with at most `jobs` at once.
@@ -259,4 +265,4 @@ async function renderFilm(file, { output = null, jobs = 2, log = () => {}, keep 
   }
 }
 
-module.exports = { loadFilm, renderFilm, brandColours, FPS, FADE };
+module.exports = { loadFilm, renderFilm, buildClip, markFor, brandColours, FPS, FADE };

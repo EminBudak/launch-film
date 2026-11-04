@@ -167,8 +167,8 @@ LOOKS.journal = {
 .lk-journal .disc{background:transparent;box-shadow:inset 0 0 0 4px var(--accent)}
 .lk-journal .rule{height:1px;box-shadow:0 5px 0 var(--fg)}
 .lk-journal .chip{border-radius:2px;background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--fg)}`,
-  ground: (t, seed, port) => {
-    const W = port ? 1080 : 1920;
+  ground: (t, seed, port, size = null) => {
+    const W = size ? size[0] : port ? 1080 : 1920;
     const x0 = port ? 84 : 120;
     return `<div class="abs" style="inset:0;background:${t.ground}"></div>` +
       `<div class="abs" style="inset:0;background-image:${grainUrl(0.5)};opacity:.07"></div>` +
@@ -188,12 +188,13 @@ const FRAME = { land: [1920, 1080], port: [1080, 1920] };
 // right edge stay clearer, where short-video apps put their own buttons.
 const SAFE = { land: { x: 120, top: 96, bottom: 120 }, port: { x: 84, top: 220, bottom: 380 } };
 
-const BASE_CSS = (t, port, fonts) => `
+// size: [W, H] for a page of another shape (a still), else the frame's.
+const BASE_CSS = (t, port, fonts, size = null) => `
 :root{--fg:${t.fg};--muted:${t.muted};--faint:${t.faint};--line:${t.line};--accent:${t.accent};--accent2:${t.accent2};--accent3:${t.accent3 || t.accent2};
 --surface:${t.surface};--surface2:${t.surface2};--ground:${t.ground};--on:${t.on};--glow:${rgba(t.accent, 0.55)};--glow2:${rgba(t.accent2, 0.45)};
 --head:"${fonts.head}";--body:"${fonts.body}";--label:"${fonts.label}";--hw:${fonts.weight.head || 700};--bw:${fonts.weight.body || 500}}
 *{box-sizing:border-box}
-html,body{margin:0;width:${port ? 1080 : 1920}px;height:${port ? 1920 : 1080}px;overflow:hidden;background:${t.ground};color:var(--fg);
+html,body{margin:0;width:${size ? size[0] : port ? 1080 : 1920}px;height:${size ? size[1] : port ? 1920 : 1080}px;overflow:hidden;background:${t.ground};color:var(--fg);
 font-family:var(--body),${FALLBACK};font-weight:var(--bw);-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
 .stage{position:absolute;inset:0;overflow:hidden;perspective:${port ? 1700 : 2100}px;perspective-origin:50% 44%}
 .ground{position:absolute;inset:0;overflow:hidden}
@@ -436,10 +437,9 @@ function camera(look, seed, port) {
   }
 }
 
-// The ground of each look.
-function groundHtml(look, t, seed, port) {
-  const W = port ? 1080 : 1920;
-  const H = port ? 1920 : 1080;
+// The ground of each look, for the frame or a page `size` [W, H].
+function groundHtml(look, t, seed, port, size = null) {
+  const [W, H] = size || (port ? FRAME.port : FRAME.land);
   if (look === "launch") {
     return `<div class="abs" style="inset:0;background:radial-gradient(${Math.round(W * 0.75)}px ${Math.round(H * 0.72)}px at 50% 6%,${t.lift} 0%,${rgba(t.lift, 0)} 72%),radial-gradient(${Math.round(W * 0.5)}px ${Math.round(H * 0.5)}px at ${seed % 2 ? 88 : 12}% 96%,${rgba(t.accent, 0.12)} 0%,${rgba(t.accent, 0)} 70%),${t.ground}"></div>` +
       `<div class="abs" data-drift="${seed % 2 ? -36 : 36},14,1.04" style="inset:-240px;background-image:linear-gradient(${t.faint} 1px,transparent 1px),linear-gradient(90deg,${t.faint} 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:radial-gradient(ellipse 58% 52% at 50% 44%,#000 22%,transparent 78%)"></div>`;
@@ -664,6 +664,28 @@ ${timelineTag()}
 // w, h } (served next to the page, page pixels), ground (its own ground's
 // hex), site (the address, or "") }. Built on the scenes' runtime: its
 // entrances, camera, drift and grain. Returns { html, end, cues, W, H }.
+// The plate a logo stands on and the site's address under it, in each
+// family's manner: the close's, and the stills'.
+function closeStyles(fam, style, t, { barW, siteSize }) {
+  return {
+    launch: `.lg-plate{border-radius:28px;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 40px 100px rgba(0,0,0,.55),0 0 120px ${rgba(t.accent, 0.3)}}
+.lg-site{padding:14px 28px 14px 22px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);font-family:var(--label),monospace;color:var(--fg)}
+.lg-site .ic{color:var(--accent)}`,
+    aurora: `.lg-plate{border-radius:40px;box-shadow:0 0 0 1.5px rgba(255,255,255,.4),0 50px 120px rgba(6,4,30,.5)}
+.lg-site{padding:14px 30px 14px 24px;border-radius:999px;background:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.18);font-weight:600;color:#fff}`,
+    gridline: style === "journal"
+      ? `.lg-plate{border-radius:2px;box-shadow:0 0 0 1px rgba(26,25,22,.22),0 16px 34px rgba(26,25,22,.08)}
+.lg-bar{height:1px;width:${barW}px;background:var(--fg);box-shadow:0 5px 0 var(--fg)}
+.lg-site{font-family:var(--head),serif;font-style:italic;font-weight:600;font-size:${Math.round(siteSize * 1.25)}px;color:var(--accent)}`
+      : `.lg-plate{border-radius:0;box-shadow:0 0 0 1px rgba(17,18,24,.14),14px 14px 0 var(--accent)}
+.lg-bar{height:8px;width:120px;background:var(--accent)}
+.lg-site{font-family:var(--label),monospace;font-weight:500;color:var(--fg);letter-spacing:.02em}
+.lg-site .ic{color:var(--accent)}`,
+    pop: `.lg-plate{border-radius:32px;box-shadow:0 0 0 5px #15131A,12px 14px 0 #15131A;transform:rotate(-2deg)}
+.lg-site{padding:14px 30px 14px 24px;border-radius:999px;background:${t.accent};color:#15131A;box-shadow:0 0 0 4px #15131A,6px 7px 0 #15131A;font-family:var(--label),monospace;font-weight:700;transform:rotate(2deg)}`,
+  }[fam];
+}
+
 const CLOSE_SFX = {
   launch: [["whoosh-cinematic", 0, 0.3], ["impact-bass-1", 0.62, 0.5], ["sparkle", 1.05, 0.22], ["click-soft", 1.3, 0.28]],
   aurora: [["whoosh-cinematic", 0, 0.3], ["chime", 0.62, 0.3], ["sparkle", 1.05, 0.26], ["pop", 1.3, 0.22]],
@@ -724,23 +746,7 @@ function logoHtml(close, { fonts, seconds = 5, icon }) {
     ? `<div class="abs" style="left:${Math.round(W / 2 - glowR)}px;top:${Math.round(cy - glowR)}px;width:${2 * glowR}px;height:${2 * glowR}px;border-radius:50%;` +
       `background:radial-gradient(circle,${rgba(t.accent, fam === "launch" ? 0.34 : 0.3)} 0%,${rgba(t.accent, 0.1)} 34%,${rgba(t.accent, 0)} 66%)"${A("fade", 0.2, 1.4)} data-drift="0,0,1.12"></div>`
     : "";
-  const markCss = {
-    launch: `.lg-plate{border-radius:28px;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 40px 100px rgba(0,0,0,.55),0 0 120px ${rgba(t.accent, 0.3)}}
-.lg-site{padding:14px 28px 14px 22px;border-radius:999px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);font-family:var(--label),monospace;color:var(--fg)}
-.lg-site .ic{color:var(--accent)}`,
-    aurora: `.lg-plate{border-radius:40px;box-shadow:0 0 0 1.5px rgba(255,255,255,.4),0 50px 120px rgba(6,4,30,.5)}
-.lg-site{padding:14px 30px 14px 24px;border-radius:999px;background:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.18);font-weight:600;color:#fff}`,
-    gridline: close.style === "journal"
-      ? `.lg-plate{border-radius:2px;box-shadow:0 0 0 1px rgba(26,25,22,.22),0 16px 34px rgba(26,25,22,.08)}
-.lg-bar{height:1px;width:${Math.round(Math.min(room.w, Math.max(mw, 360) * 1.1))}px;background:var(--fg);box-shadow:0 5px 0 var(--fg)}
-.lg-site{font-family:var(--head),serif;font-style:italic;font-weight:600;font-size:${Math.round(siteSize * 1.25)}px;color:var(--accent)}`
-      : `.lg-plate{border-radius:0;box-shadow:0 0 0 1px rgba(17,18,24,.14),14px 14px 0 var(--accent)}
-.lg-bar{height:8px;width:120px;background:var(--accent)}
-.lg-site{font-family:var(--label),monospace;font-weight:500;color:var(--fg);letter-spacing:.02em}
-.lg-site .ic{color:var(--accent)}`,
-    pop: `.lg-plate{border-radius:32px;box-shadow:0 0 0 5px #15131A,12px 14px 0 #15131A;transform:rotate(-2deg)}
-.lg-site{padding:14px 30px 14px 24px;border-radius:999px;background:${t.accent};color:#15131A;box-shadow:0 0 0 4px #15131A,6px 7px 0 #15131A;font-family:var(--label),monospace;font-weight:700;transform:rotate(2deg)}`,
-  }[fam];
+  const markCss = closeStyles(fam, close.style, t, { barW: Math.round(Math.min(room.w, Math.max(mw, 360) * 1.1)), siteSize });
   const css = `.lg{position:absolute;left:50%;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:${gap}px}
 .lg>*{position:relative;flex:none}
 .lg-plate{position:relative;display:block}
@@ -998,6 +1004,153 @@ ${timelineTag()}
   return { html, cues, W, H };
 }
 
+// ─── stills ────────────────────────────────────────────────────────────────
+// A launch still at a store's or a site's own size, standing still: the
+// look's ground and type with the brand's mark, its promise and its real
+// screen (the hero), or the mark alone (the tile). Laid out 1920 px wide in
+// the still's own shape. spec: { kind ("hero" or "tile"), look, W, H, brand
+// (the film's colours), fonts, mark ({ file, w, h, icon, ground }, served
+// next to the page, or null), name, title (the promise, with *marked*
+// words), site, words (false leaves the title and the site out), screen
+// ({ file, w, h }, a capture of the site, or null), shots ([{ file, w, h }],
+// store screenshots) }. Returns { html, W, H }.
+function stillHtml(spec) {
+  const look = LOOKS[spec.look];
+  const fam = look.family || spec.look;
+  const { W, H } = spec;
+  // An even seed: pop stands on the brand's own field, never on cream.
+  const seed = 2;
+  const b = spec.brand || {};
+  const t = look.tokens({ accent: b.accent || null, background: b.background || null, accent2: b.accent2 || null }, seed);
+  const fonts = spec.fonts;
+  const words = spec.words !== false;
+  const m = Math.round(W * 0.0625);
+  const mv = Math.max(44, Math.round(H * 0.11));
+  const pic = spec.kind === "hero" ? (spec.screen ? "screen" : spec.shots && spec.shots.length ? "shots" : null) : null;
+  const textW = pic ? Math.round(W * (W / H > 2.2 ? 0.34 : 0.38)) : Math.round(W * 0.7);
+  const mark = spec.mark;
+  const plated = Boolean(mark) && !mark.icon && (fam === "pop" || contrast(mark.ground || t.ground, t.ground) >= 1.4);
+  const tile = spec.kind === "tile";
+  const shadow = t.dark ? "rgba(0,0,0,.55)" : "rgba(17,18,24,.18)";
+
+  // The mark's size: the whole tile's middle, or the head of the words.
+  let markHtml = "";
+  if (mark) {
+    const side = Math.round(tile ? Math.min(W, H) * 0.56 : Math.min(H * 0.17, 190));
+    // With no words beside it, the mark takes their room.
+    const boxW = tile ? W * (plated ? 0.5 : 0.62) : (pic ? textW : W * 0.5) * (words ? 0.72 : 0.92);
+    const boxH = tile ? H * (plated ? 0.36 : 0.46) : H * (pic ? (words ? 0.1 : 0.2) : 0.13) * (plated ? 0.8 : 1);
+    const k = mark.icon ? side / Math.max(mark.w, mark.h) : Math.min(boxW / mark.w, boxH / mark.h);
+    const mw = Math.round(mark.w * k);
+    const mh = Math.round(mark.h * k);
+    const img = `<div class="st-mark${mark.icon ? " icon" : ""}" style="width:${mw}px;height:${mh}px"><img src="${esc(mark.file)}" alt=""></div>`;
+    markHtml = plated ? `<div class="lg-plate" style="background:${mark.ground};padding:${Math.max(16, Math.round(0.3 * mh))}px ${Math.max(28, Math.round(0.12 * mw + 20))}px">${img}</div>` : img;
+  }
+  const name = !mark && spec.name ? `<div class="head st-name" data-fit data-min="28" style="width:${tile ? Math.round(W * 0.8) : textW}px;font-size:${Math.round(H * (tile ? 0.2 : 0.07))}px">${esc(spec.name)}</div>` : "";
+  const titleSize = Math.max(40, Math.round(H * (pic ? 0.08 : 0.1)));
+  const title = words && spec.title && !tile
+    ? `<div class="head st-title fit" data-fit data-min="28" style="width:${textW}px;height:${Math.round(titleSize * 3.15)}px;font-size:${titleSize}px">${marked(spec.title)}</div>` : "";
+  const siteSize = Math.max(22, Math.min(36, Math.round(H * 0.032)));
+  const site = words && spec.site && !tile ? `<div class="lg-site st-site">${esc(spec.site)}</div>` : "";
+  const block = `<div class="st-words${pic ? "" : " middle"}" style="${pic ? `left:${m}px;width:${textW}px` : `left:${Math.round((W - textW) / 2)}px;width:${textW}px`}">${markHtml}${name}${title}${site}</div>`;
+
+  // The product: the site's screen in a window, or the store screenshots.
+  let product = "";
+  let behind = "";
+  if (pic === "screen") {
+    const x0 = m + textW + Math.round(W * 0.05);
+    const x1 = W - Math.round(m * 0.6);
+    const aw = x1 - x0;
+    const ah = H - 2 * mv;
+    const bar = 44;
+    const ratio = Math.max(1.25, Math.min(1.9, spec.screen.w / spec.screen.h));
+    const ww = Math.round(Math.min(aw, (ah - bar) * ratio));
+    const wh = Math.round(ww / ratio) + bar;
+    const wx = Math.round(x0 + (aw - ww) / 2);
+    const wy = Math.round((H - wh) / 2);
+    const tilt = fam === "launch" ? "perspective(2400px) rotateY(-12deg) rotateX(5deg)" : fam === "aurora" ? "perspective(2400px) rotateY(-9deg) rotateX(4deg)" : fam === "pop" ? "rotate(2deg)" : "none";
+    const frame = {
+      launch: `box-shadow:0 0 0 1px rgba(255,255,255,.14),0 60px 120px rgba(0,0,0,.6),0 0 140px ${rgba(t.accent, 0.25)}`,
+      aurora: `box-shadow:0 0 0 1.5px rgba(255,255,255,.35),0 50px 110px rgba(6,4,30,.5)`,
+      gridline: `box-shadow:0 0 0 1px rgba(17,18,24,.14),0 24px 50px rgba(17,18,24,.12)`,
+      pop: `box-shadow:0 0 0 5px #15131A,14px 16px 0 #15131A`,
+    }[fam];
+    if (fam === "launch" || fam === "aurora") behind = `<div class="abs" style="left:${Math.round(wx + ww / 2 - ww * 0.75)}px;top:${Math.round(wy + wh / 2 - ww * 0.75)}px;width:${Math.round(ww * 1.5)}px;height:${Math.round(ww * 1.5)}px;border-radius:50%;background:radial-gradient(circle,${rgba(t.accent, 0.3)} 0%,${rgba(t.accent, 0.08)} 36%,${rgba(t.accent, 0)} 66%)"></div>`;
+    else if (spec.look === "gridline") behind = `<div class="abs" style="left:${wx + 36}px;top:${wy + 36}px;width:${ww}px;height:${wh}px;background:${t.accent}"></div>`;
+    product = `<div class="st-win" style="left:${wx}px;top:${wy}px;width:${ww}px;height:${wh}px;transform:${tilt};${frame};border-radius:${fam === "gridline" ? 6 : 18}px">` +
+      `<div class="bar" style="height:${bar}px"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i></div>` +
+      `<img src="${esc(spec.screen.file)}" alt="" style="top:${bar}px;height:${wh - bar}px"></div>`;
+  } else if (pic === "shots") {
+    const x0 = m + textW + Math.round(W * 0.04);
+    const x1 = W - Math.round(m * 0.5);
+    const shots = spec.shots.slice(0, 3);
+    const ch = H - 2 * mv;
+    const widths = shots.map((s) => Math.round((ch * s.w) / s.h));
+    const total = widths.reduce((a, w) => a + w, 0) + 40 * (shots.length - 1);
+    const squeeze = Math.min(1, (x1 - x0 - Math.max(...widths)) / Math.max(1, total - Math.max(...widths)));
+    const mid = (shots.length - 1) / 2;
+    let x = x0 + Math.max(0, (x1 - x0 - total) / 2);
+    const cards = shots.map((s, i) => {
+      const off = i - mid;
+      const turn = fam === "pop" ? `rotate(${off * 4}deg)` : fam === "gridline" ? "none" : `perspective(2200px) rotateY(${-off * 14}deg)`;
+      const card = `<div class="st-shot" style="left:${Math.round(x)}px;top:${mv}px;width:${widths[i]}px;height:${ch}px;transform:${turn};z-index:${10 - Math.abs(Math.round(off * 2))};border-radius:${Math.round(widths[i] * 0.07)}px"><img src="${esc(s.file)}" alt=""></div>`;
+      x += (widths[i] + 40) * squeeze;
+      return card;
+    });
+    product = cards.join("");
+  }
+  const shotStyle = {
+    launch: ".st-shot{box-shadow:0 0 0 1px rgba(255,255,255,.14),0 50px 110px rgba(0,0,0,.6)}",
+    aurora: ".st-shot{box-shadow:0 0 0 1.5px rgba(255,255,255,.35),0 40px 100px rgba(6,4,30,.5)}",
+    gridline: ".st-shot{box-shadow:0 0 0 1px rgba(17,18,24,.14),0 24px 50px rgba(17,18,24,.12)}",
+    pop: ".st-shot{box-shadow:0 0 0 5px #15131A,12px 14px 0 #15131A}",
+  }[fam];
+  const css = `${fonts.css}${BASE_CSS(t, false, fonts, [W, H])}
+${closeStyles(fam, spec.look, t, { barW: 0, siteSize })}
+.st-words{position:absolute;top:0;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:${Math.round(H * 0.045)}px}
+.st-words.middle{align-items:center;text-align:center}
+.st-words>*{flex:none}
+.st-mark{position:relative}
+.st-mark img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.st-mark.icon{border-radius:22.4%;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 30px 70px ${shadow}}
+.lg-plate{display:inline-block}
+.st-title{line-height:1.02}
+.st-name{line-height:1}
+.lg-site{display:inline-flex;align-items:center;font-size:${siteSize}px;line-height:1.2;white-space:nowrap;padding-top:${Math.round(siteSize * 0.35)}px;padding-bottom:${Math.round(siteSize * 0.35)}px}
+.st-win{position:absolute;overflow:hidden;background:#fff;transform-origin:50% 50%}
+.st-win .bar{position:absolute;left:0;right:0;top:0;background:${t.dark ? "#171A26" : "#F3F3F6"};border-bottom:1px solid ${t.dark ? "rgba(255,255,255,.08)" : "#E2E3EA"};display:flex;align-items:center;gap:10px;padding-left:20px}
+.st-win .bar i{width:13px;height:13px;border-radius:50%;display:block}
+.st-win img{position:absolute;left:0;width:100%;object-fit:cover;object-position:50% 0;display:block}
+.st-shot{position:absolute;overflow:hidden;background:#fff}
+.st-shot img{position:absolute;inset:0;width:100%;height:100%;display:block}
+${shotStyle}
+.tile{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}`;
+  const body = tile ? `<div class="tile">${markHtml || name}</div>` : `${behind}${product}${block}`;
+  // Type that does not fit its box is made smaller, once, then the box hugs
+  // it. Descenders reach past a tight line box; that is not overflow.
+  const fit = String.raw`window.__fit = () => {
+  for (const el of document.querySelectorAll("[data-fit]")) {
+    if (el.dataset.done) continue;
+    const min = parseFloat(el.dataset.min) || 20;
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    for (let i = 0; i < 80 && size > min && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + size * 0.2); i++) {
+      size *= 0.96;
+      el.style.fontSize = size + "px";
+    }
+    el.style.height = "auto";
+    el.dataset.done = "1";
+  }
+};
+document.fonts.ready.then(() => window.__fit());`;
+  const html = `<!doctype html><html lang="${esc(spec.lang || "en")}"><head><meta charset="utf-8">
+<style>${css}${look.css ? look.css(t) : ""}</style></head>
+<body class="lk-${spec.look} fam-${fam} t-still">
+<div class="stage"><div class="ground">${look.ground ? look.ground(t, seed, false, [W, H]) : groundHtml(fam, t, seed, false, [W, H])}</div><div class="world">${body}</div>
+<div class="post"><div class="vignette"></div><div class="grain"></div></div></div>
+<script>${fit}</script></body></html>`;
+  return { html, W, H };
+}
+
 const supports = (style, type) => Boolean(LOOKS[style]) && Boolean(require("./types")[type]);
 
-module.exports = { LOOKS, FRAME, sceneHtml, screenHtml, logoHtml, deviceHtml, galleryHtml, supports, helpers: { rgb, mix, rgba, readable, contrast, turn, luminance, saturation, esc, hash } };
+module.exports = { LOOKS, FRAME, sceneHtml, screenHtml, logoHtml, deviceHtml, galleryHtml, stillHtml, supports, helpers: { rgb, mix, rgba, readable, contrast, turn, luminance, saturation, esc, hash } };

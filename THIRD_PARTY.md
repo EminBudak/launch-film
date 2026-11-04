@@ -54,4 +54,5 @@ They are embedded in the pages that are rendered, and reach the film only as pix
 
 - The timeline that moves every page (`src/runtime/timeline.js`) is this package's own code. Its method names follow the shape of GSAP's (`gsap.timeline()`, `tl.from()`, `"expo.out"`) because motion designers know them, but no GSAP code is included or loaded.
 - Every sound (the music bed and all sound effects) is synthesised by `src/audio.js`. There are no recordings or samples.
+- The 5x7 pixel face that labels the contact sheets and the loudness chart (`src/draw.js`) was drawn for this package, so `check` and `frames` need no font on the machine.
 - The test brand in `test/fixtures/acme`, "Acme Notes", is a made-up product drawn by `test/fixtures/make-fixture.js`.
